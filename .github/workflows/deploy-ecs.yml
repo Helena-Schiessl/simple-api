@@ -35,6 +35,6 @@ jobs:
     - name: Atualizar serviço no ECS
       run: |
         aws ecs update-service \
-          --cluster simple-api-cluster \
+          --cluster ecs-simple-api \
           --service simple-api-service \
           --force-new-deployment
