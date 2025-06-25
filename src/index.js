@@ -1,33 +1,41 @@
 const express = require('express');
+const dotenv = require('dotenv');
 const { Pool } = require('pg');
+const connectRoute = require('./routes/connect'); // importa a rota /connect
 
-const app = express();
-const port = 3000;
+dotenv.config(); // Carrega variáveis do .env
 
-// Conexão com o banco PostgreSQL usando variáveis de ambiente
+// Log para verificar se as variáveis estão sendo carregadas
+console.log('ENV:', {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  db: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+});
+
+// Cria o pool de conexão fora das rotas (boa prática)
 const pool = new Pool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-  port: 5432,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT),
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
-// Teste de conexão com o banco
-pool.connect((err, client, release) => {
-  if (err) {
-    return console.error('Erro na conexão com o banco:', err);
-  }
-  console.log('Conectado ao banco PostgreSQL!');
-  release();
-});
+
+const app = express();
+app.use(express.json());
 
 // Rota principal
 app.get('/', (req, res) => {
   res.send('API funcionando com sucesso!');
 });
 
-// Rota para testar o banco
+// Rota de teste do banco (SELECT NOW())
 app.get('/db', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
@@ -38,7 +46,11 @@ app.get('/db', async (req, res) => {
   }
 });
 
-// Inicializa o servidor
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+// Ativa a rota /connect
+app.use('/', connectRoute);
+
+// Sobe o servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
