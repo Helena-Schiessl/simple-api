@@ -1,16 +1,16 @@
-# 📘 simple-api
+# simple-api
 
 API Node.js com Express que realiza conexão com PostgreSQL hospedado na AWS RDS.
 
 ---
 
-## 📝 Descrição
+## Descrição
 
 Uma API em Node.js utilizando o Express Framework que realiza a conexão com um banco de dados PostgreSQL.
 
 ---
 
-## ▶️ Como utilizar
+## Como utilizar
 
 O comando para iniciar a API é:
 
@@ -25,7 +25,7 @@ node src/index.js
 
 ---
 
-## 📌 Rotas
+## Rotas
 
 | Rota     | Método | Descrição                                                                 |
 |----------|--------|---------------------------------------------------------------------------|
@@ -35,7 +35,7 @@ node src/index.js
 
 ---
 
-## 🔐 Variáveis de Ambiente
+## Variáveis de Ambiente
 
 | Nome          | Description                 | Padrão                            |
 |---------------|-----------------------------|-----------------------------------|
@@ -48,7 +48,7 @@ node src/index.js
 
 ---
 
-## 🚀 Tecnologias
+## Tecnologias
 
 - Node.js
 - Express
@@ -58,7 +58,24 @@ node src/index.js
 
 ---
 
-## 🙋‍♀️ Desenvolvedora
+## Infraestrutura
+
+Toda a infraestrutura do projeto foi provisionada utilizando **[Terraform](https://www.terraform.io/)**.  
+Os arquivos estão localizados na pasta `terraform/` do repositório.
+
+### Recursos criados via Terraform:
+
+- 🔹 **VPC personalizada** com subnets públicas e privadas
+- 🔹 **Internet Gateway** e **NAT Gateway** para acesso externo controlado
+- 🔹 **RDS PostgreSQL** configurado com acesso seguro
+- 🔹 **Security Groups** com regras específicas de acesso
+- 🔹 **Elastic Load Balancer (ALB)** para distribuir as requisições
+- 🔹 **ECS com Fargate** para executar os containers da API
+- 🔹 **Repositório ECR** para armazenar a imagem Docker da aplicação
+
+---
+
+## Desenvolvedora
 
 Helena Schiessl  
 [linkedin.com/in/helenaschiessl](https://www.linkedin.com/in/helenaschiessl/)
