@@ -1,56 +1,52 @@
+const { Client } = require('pg');
 const express = require('express');
-const dotenv = require('dotenv');
-const { Pool } = require('pg');
-const connectRoute = require('./routes/connect'); // importa a rota /connect
 
-dotenv.config(); // Carrega variáveis do .env
+(async () => {
+    const app = express()
+    const port = process.env.API_PORT || 3000
+    let i = 0
 
-// Log para verificar se as variáveis estão sendo carregadas
-console.log('ENV:', {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  db: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-});
+    app.listen(port, () => {
+        console.log(`API iniciada. Escutando PORT ${port}`)
+    })
 
-// Cria o pool de conexão fora das rotas (boa prática)
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT),
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+    app.use((req, res, next) => {
+        i++;
+        next();
+    })
 
+    app.get('/', async (req, res) => {
+        const response = { 'message': "API OK!", 'request_id': i }
+        console.log(response)
+        res.send(response)
+    })
 
-const app = express();
-app.use(express.json());
+    app.get('/connect', async (req, res) => {
+        try {
+            const client = new Client({
+                user: process.env.DB_USER,
+                host: process.env.DB_HOST,
+                database: process.env.DB_DATABASE,
+                password: process.env.DB_PASSWORD,
+                port: process.env.DB_PORT || 5432,
+            })
+            await client.connect()
 
-// Rota principal
-app.get('/', (req, res) => {
-  res.send('API funcionando com sucesso!');
-});
+            const result = await client.query('SELECT version()')
+            const version = result.rows[0].version
 
-// Rota de teste do banco (SELECT NOW())
-app.get('/db', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ time: result.rows[0] });
-  } catch (error) {
-    console.error('Erro na consulta:', error);
-    res.status(500).send('Erro na conexão com o banco');
-  }
-});
+            await client.end()
 
-// Ativa a rota /connect
-app.use('/', connectRoute);
+            const response = { 'message': "Conectado ao banco", 'version': version, 'request_id': i }
+            console.log(response)
+            res.send(response)
+        } catch (e) {
+            const error = { 'message': 'Erro ao se conectar ao banco', 'request_id': i }
+            console.log(error)
+            console.log(e)
 
-// Sobe o servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+            res.status(500);
+            res.send(error)
+        }
+    })
+})()
