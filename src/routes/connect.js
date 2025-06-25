@@ -15,7 +15,8 @@ const pool = new Pool({
   }
 });
 
-router.get('/connect', async (req, res) => {
+// Corrige a rota para que seja acessível em /connect
+router.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT version()');
     res.json({ version: result.rows[0].version });
